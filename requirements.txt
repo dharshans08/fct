@@ -1,0 +1,11 @@
+# Core Django requirements
+django==5.1.2
+
+# Database support
+mysqlclient==2.2.0  # Required for MySQL database connection
+
+# Data analysis and table handling (if applicable for sales data)
+pandas==2.1.0  # For handling tabular data
+
+
+
