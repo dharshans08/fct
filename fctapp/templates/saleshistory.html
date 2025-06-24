@@ -1,0 +1,405 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="{% static 'images/favicon.png' %}"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'css/salesforcast.css' %}"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <title>Historical Sales</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'css/saleshistory.css' %}"
+    />
+  </head>
+
+  <body>
+    <div class="d-flex">
+      <!-- Add sidebar toggle button -->
+      <button class="sidebar-toggle d-lg-none" type="button">
+        <i class="fas fa-bars"></i>
+      </button>
+      <!-- Update sidebar class -->
+      <div class="sidebar d-lg-block">
+        <a href="#" class="logo d-flex align-items-center">
+          <img
+            src="{% static 'images/logo.png' %}"
+            alt="TRIK Logo"
+            style="
+              max-width: 70%;
+              height: auto;
+              margin-left: 5%;
+              margin-bottom: 10%;
+            "
+          />
+        </a>
+        <div class="nav flex-column">
+          <a
+            href="{% url 'sales_forcast' %}"
+            class="nav-link d-flex align-items-center"
+            style="font-weight: 600"
+          >
+            <img
+              src="{% static 'images/salesforcast.png' %}"
+              alt="TRIK Logo"
+              class="navicon"
+            />
+            Sales Forecasting
+          </a>
+          <a
+            href="{% url 'sales_history' %}"
+            class="nav-link active d-flex align-items-center"
+            style="font-weight: 600"
+          >
+            <img
+              src="{% static 'images/salesicon.png' %}"
+              alt="TRIK Logo"
+              class="navicon"
+            />
+            Historical Sales
+          </a>
+          <a
+            href="{% url 'add_sales' %}"
+            class="nav-link d-flex align-items-center"
+            style="font-weight: 600"
+          >
+            <img
+              src="{% static 'images/addsalesicon.png' %}"
+              alt="TRIK Logo"
+              class="navicon"
+            />
+            Add Sales Data
+          </a>
+          <a
+            href="{% url 'forecasting' %}"
+            class="nav-link d-flex align-items-center"
+            style="font-weight: 600"
+          >
+            <img
+              src="{% static 'images/salesforcast.png' %}"
+              alt="TRIK Logo"
+              class="navicon"
+            />
+            Forecasting
+          </a>
+          <a
+            href="{% url 'logout' %}"
+            class="nav-link d-flex align-items-center mt-auto"
+            style="font-weight: 600"
+          >
+            <img
+              src="{% static 'images/logouticon.png' %}"
+              alt="TRIK Logo"
+              class="navicon"
+            />
+            Logout
+          </a>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="container-fluid py-4 px-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div class="d-flex flex-column flex-md-row gap-3 mt-md-2">
+            <div class="input-group mb-2 mb-md-0">
+              <span class="input-group-text bg-white fw-bold">From </span>
+              <input type="date" class="form-control" id="fromDate" />
+            </div>
+            <div class="input-group mb-2 mb-md-0">
+              <span class="input-group-text bg-white fw-bold">To </span>
+              <input type="date" class="form-control" id="toDate" />
+            </div>
+            <div
+              class="d-flex flex-column flex-md-row align-items-center filter-container"
+            >
+              <button class="btn btn-secondary" id="generateBtn" disabled>
+                Generate
+              </button>
+
+              <div class="filter-popup2" style="display: none">
+                <div class="header">
+                  <h3>Filters</h3>
+                  <button class="close-btn" onclick="toggleFilterPopup()">
+                    ✕
+                  </button>
+                </div>
+                <div class="dropdown-item">Division</div>
+                <div class="dropdown-item">Region</div>
+                <div class="dropdown-item">Year</div>
+                <div class="dropdown-item">Product Family</div>
+                <div class="dropdown-item">Fiscal Quarter</div>
+                <div class="dropdown-item">Granularity</div>
+                <div class="footer">
+                  <button class="reset-btn">Reset all</button>
+                  <button class="apply-btn" onclick="toggleFilterPopup()">
+                    Apply
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="d-flex justify-content-end align-items-center mb-4 margin-right: 1rem;"
+          >
+            <div class="user-icon">
+              <img
+                src="{% static 'images/usericon.png' %}"
+                alt="TRIK Logo"
+                style="max-width: 80%; height: auto; margin-left: 5%"
+              />
+              <span class="ms-2">{{user.username}}</span>
+            </div>
+          </div>
+        </div>
+
+        <h2 class="mb-2 text-blue">Historical Sales</h2>
+        <div
+          id="infoText"
+          class="text-center my-4 p-3 rounded d-flex flex-column align-items-center justify-content-center"
+        >
+          <img
+            src="{% static 'images/InfoText.png' %}"
+            alt="Select Date Range"
+            class="mb-3"
+            style="max-width: 250px; max-height: 250px; margin-top: 100px"
+          />
+          <p class="text-danger fw-bold fs-5">
+            Please Select From Date and To Date to generate the Historical
+            Sales.
+          </p>
+        </div>
+        <!-- Stats cards in single row -->
+        <div class="row g-4 mb-4" id="statsCards" style="display: none">
+          <div class="col-12 col-md-6 col-xl-3">
+            <div class="card h-100 rounded-4 border shadow">
+              <div class="card-body mt-3">
+                <h6 class="card-subtitle mb-2 fw-bold">Total Sales</h6>
+                <div class="d-flex justify-content-between align-items-center">
+                  <h4 class="card-title mb-0 text-blue" id="totalSales">
+                    $ {{total_sales}}
+                  </h4>
+                  <span
+                    id="salesIncrease"
+                    class="text-success fw-bold fs-5"
+                  ></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-6 col-xl-3">
+            <div class="card h-100 border rounded-4 shadow">
+              <div class="card-body mt-3">
+                <h6 class="card-subtitle mb-2 fw-bold">Net Margin</h6>
+                <div class="d-flex justify-content-between align-items-center">
+                  <h4 class="card-title mb-0 text-blue" id="netMargin">
+                    $0.00
+                  </h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts layout -->
+        <div class="row g-4 mb-4" id="chartsLayout" style="display: none">
+          <div class="col-md-8">
+            <div class="card h-10 rounded-4 border shadow-sm mb-4">
+              <div class="card-body p-4">
+                <div
+                  class="d-flex justify-content-between align-items-center mb-2"
+                >
+                  <h3 class="card-title mb-0 fw-bold text-blue px-4">
+                    Revenue Analytics
+                  </h3>
+                </div>
+                <div style="position: relative; height: 400px; width: 100%">
+                  <canvas
+                    id="revenueChart"
+                    style="max-height: 100%; width: 100%"
+                  ></canvas>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="card-body p-2 mt-3">
+                <div
+                  class="d-flex justify-content-between align-items-center mb-4"
+                >
+                  <h3 class="card-title mb-0 fw-bold px-2">Recent Data</h3>
+                  <!-- <select class="form-select fw-bold" style="width: auto">
+                    <option class="fw-bold">All Categories</option>
+                  </select> -->
+                </div>
+                <div class="table-responsive rounded-3">
+                  <table id="RecentData" class="table border text-center">
+                    <thead>
+                      <tr>
+                        <th class="table-headtext text-center">Region</th>
+                        <th class="table-headtext text-center">Product Name</th>
+                        <th class="table-headtext text-center">
+                          Product Family
+                        </th>
+                        <th class="table-headtext text-center">Sales Amount</th>
+                        <th class="table-headtext text-center">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for data in recent_sales_data %}
+                      <tr>
+                        <td class="text-center align-middle">
+                          {{ data.region }}
+                        </td>
+                        <td class="text-center align-middle">
+                          {{ data.product_name }}
+                        </td>
+                        <td class="text-center align-middle">
+                          {{ data.product_family }}
+                        </td>
+                        <td class="text-center align-middle">
+                          ${{ data.sales_amount }}
+                        </td>
+                        <td class="text-center align-middle">
+                          {{ data.posting_date }}
+                        </td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="border-0 h-10 mb-4">
+              <div class="card-body w-20 p-6 border-0">
+                <div class="row mb-4">
+                  <div class="d-flex align-items-center">
+                    <!-- other elements -->
+                  </div>
+                  <div
+                    id="filterPopup"
+                    class="popup"
+                    style="display: none; width: 250px"
+                  >
+                    <div class="buttons">
+                      <button class="btn btn-cancel" onclick="togglePopup()">
+                        Cancel
+                      </button>
+                      <button
+                        class="btn btn-apply"
+                        id="applyFiltersBtn"
+                        onclick="applyFilters()"
+                      >
+                        Apply
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="card border p-4 rounded-4 shadow-sm">
+                  <h5 class="card-title mb-4 fw-bold">Product Comparison</h5>
+                  <div class="d-flex align-items-center mb-4">
+                    <select
+                      id="groupingSelect"
+                      class="form-select"
+                      style="width: auto"
+                    >
+                      <option>Division</option>
+                      <option>Region</option>
+                      <option>Product Family</option>
+                      <option>Account Owner</option>
+
+                    </select>
+                    <button
+                      class="filter-btn d-flex align-items-center ms-auto"
+                      onclick="togglePopup()"
+                    >
+                      Filters
+                      <i class="fas fa-chevron-down ms-1 align-self-center"></i>
+                    </button>
+                  </div>
+                  <div style="position: relative; min-height: 350px">
+                    <canvas id="barChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card h-70">
+              <div class="card border p-4 rounded-4 shadow-sm">
+                <h5 class="card-title mb-4 fw-bold">Sales By Top Products</h5>
+                <div style="position: relative; min-height: 250px">
+                  <canvas id="pieChart"></canvas>
+                </div>
+
+                <div class="table-responsive">
+                  <table class="table table-borderless text-center">
+                    <thead>
+                      <tr>
+                        <th scope="col" class="text-muted text-center">
+                          Source
+                        </th>
+                        <th scope="col" class="text-muted text-center">
+                          QTY_Base
+                        </th>
+                        <th scope="col" class="text-muted text-center">
+                          Amount
+                        </th>
+                      </tr>
+                    </thead>
+                  
+                    <tbody id="dynamicProductsTable">
+                      {% for product in pieChartDataFeed %}
+                      <tr>
+                        <td class="text-start" style="min-width: 150px">
+                          <div class="d-flex align-items-center">
+                            <!-- Color square styled with CSS -->
+                            <div
+                              class="color-square me-3"
+                              style="background-color: {{ product.color  }};"
+                            ></div>
+                            <span>{{ product.name }}</span>
+                          </div>
+                        </td>
+                        <td class="text-center">{{ product.orders }}</td>
+                        <td class="text-center">
+                          ${{ product.amount|floatformat:2 }}
+                        </td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <script type ="module" src="{% static 'js/saleshistory.js' %}"></script>
+  </body>
+</html>

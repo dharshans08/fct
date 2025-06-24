@@ -1,0 +1,264 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="{% static 'images/favicon.png' %}"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'css/salesforcast.css' %}"
+    />
+    <title>Sales Forecasting</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'css/salesforcast.css' %}"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+
+  <body>
+    <div class="d-flex">
+      <!-- Add sidebar toggle button -->
+      <button class="sidebar-toggle d-lg-none" type="button">
+        <i class="fas fa-bars"></i>
+      </button>
+
+      <!-- Update sidebar class -->
+      <div class="sidebar d-lg-block">
+        <a href="#" class="logo d-flex align-items-center">
+          <img src="{% static 'images/logo.png' %}" alt="TRIK Logo"
+          style="max-width: 70%; height: auto; margin-left: 5%; margin-bottom:
+          10%;" " />
+        </a>
+        <div class="nav flex-column">
+          <a
+            href="{% url 'sales_forcast' %}"
+            class="nav-link active d-flex align-items-center"
+            style="font-weight: 600"
+          >
+            <img
+              src="{% static 'images/salesforcast.png' %}"
+              alt="TRIK Logo"
+              class="navicon"
+            />
+            Sales Forecasting
+          </a>
+          <a
+            href="{% url 'sales_history' %}"
+            class="nav-link d-flex align-items-center"
+            style="font-weight: 600"
+          >
+            <img
+              src="{% static 'images/salesicon.png' %}"
+              alt="TRIK Logo"
+              class="navicon"
+            />
+            Historical Sales
+          </a>
+          <a
+            href="{% url 'add_sales' %}"
+            class="nav-link d-flex align-items-center"
+            style="font-weight: 600"
+          >
+            <img
+              src="{% static 'images/addsalesicon.png' %}"
+              alt="TRIK Logo"
+              class="navicon"
+            />
+            Add Sales Data
+          </a>
+          <a
+          href="{% url 'forecasting' %}"
+          class="nav-link d-flex align-items-center"
+          style="font-weight: 600"
+        >
+          <img
+            src="{% static 'images/salesforcast.png' %}"
+            alt="TRIK Logo"
+            class="navicon"
+          />
+         Forecasting
+        </a>
+          <a
+            href="{% url 'logout' %}"
+            class="nav-link d-flex align-items-center mt-auto"
+            style="font-weight: 600"
+          >
+            <img
+              src="{% static 'images/logouticon.png' %}"
+              alt="TRIK Logo"
+              class="navicon"
+            />
+            Logout
+          </a>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="container-fluid py-4 px-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div class="d-flex flex-column flex-md-row gap-3 mt-3 mt-md-3">
+            <div class="input-group mb-2 mb-md-0">
+              <span class="input-group-text bg-white fw-bold">From </span>
+              <input type="date" class="form-control" id="fromDate" value="{{ start_date }}" />
+            </div>
+            <div class="input-group mb-2 mb-md-0">
+              <span class="input-group-text bg-white fw-bold">To </span>
+              <input type="date" class="form-control" id="toDate" value="{{ end_date }}" />
+            </div>
+            <button class="btn btn-secondary" id="generateBtn" disabled>
+              Generate
+            </button>
+          </div>
+
+          <div class="user-icon">
+            <img
+              src="{% static 'images/usericon.png' %}"
+              alt="TRIK Logo"
+              style="max-width: 80%; height: auto; margin-left: 5%"
+            />
+            <span class="ms-2">{{ user.username }}</span>
+          </div>
+        </div>
+
+        <h2 class="mb-2 text-blue">Sales Forecasting</h2>
+        <div
+          id="infoText"
+          class="text-center my-4 p-3 rounded d-flex flex-column align-items-center justify-content-center"
+          style="display: {% if start_date and end_date %}none{% else %}flex{% endif %}"
+        >
+          <img
+            src="{% static 'images/InfoText.png' %}"
+            alt="Select Date Range"
+            class="mb-3"
+            style="max-width: 250px; max-height: 250px ; margin-top: 100px;"
+          />
+          <p class="text-danger fw-bold fs-5">
+            Please Select From Date and To Date to generate the Sales
+            Forecasting.
+          </p>
+        </div>
+        <!-- <div class="row g-4 mb-4" id="statsCards" style="display: {% if start_date and end_date %}flex{% else %}none{% endif %}">
+          <div class="col-12 col-sm-6 col-md-6 col-lg-3">
+            <div class="card h-100 rounded-4 shadow">
+              <div class="card-body">
+                <h6 class="card-subtitle mb-2 fw-bold">Total Sales</h6>
+                <div class="d-flex justify-content-between align-items-center">
+                  <h4 id = "totalSales" class="card-title mb-0 text-blue">${{ total_actual_sales }}</h4>
+                  <span id="salesChange" class="text-success fw-bold fs-5">↑ 10%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6 col-md-6 col-lg-3">
+            <div class="card h-100 rounded-4 shadow">
+              <div class="card-body">
+                <h6 class="card-subtitle mb-2 fw-bold">Net Margin</h6>
+                <div class="d-flex justify-content-between align-items-center">
+                  <h4 class="card-title mb-0 text-blue">+68.77%</h4>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6 col-md-6 col-lg-3">
+            <div class="card h-100 rounded-4 shadow">
+              <div class="card-body">
+                <h6 class="card-subtitle mb-2 fw-bold">Historical - CAGR</h6>
+                <div class="d-flex justify-content-between align-items-center">
+                  <h4 class="card-title mb-0 text-blue fw-bold">45.50%</h4>
+                  <span class="text-success fs-5 fw-bold">↑</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6 col-md-6 col-lg-3">
+            <div class="card h-100 rounded-4 shadow">
+              <div class="card-body">
+                <h6 class="card-subtitle mb-2 fw-bold">Forecast - CAGR</h6>
+                <div class="d-flex justify-content-between align-items-center">
+                  <h4 class="card-title mb-0 text-blue">55.23%</h4>
+                  <span class="text-success fs-5 fw-bold">↑</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div> -->
+
+
+        <div class="row g-4 mb-4" id="statsCards" style="display: {% if start_date and end_date %}flex{% else %}none{% endif %}">
+          <div class="col-12 col-sm-6 col-md-6 col-lg-3">
+            <div class="card h-100 rounded-4 shadow">
+              <div class="card-body">
+                <h6 class="card-subtitle mb-2 fw-bold">Total Sales</h6>
+                <div class="d-flex justify-content-between align-items-center">
+                  <h4 id="totalSales" class="card-title mb-0 text-blue">${{ total_actual_sales }}</h4>
+                  <span id="salesChange" class="text-success fw-bold fs-5">↑0.0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6 col-md-6 col-lg-3">
+            <div class="card h-100 rounded-4 shadow">
+              <div class="card-body">
+                <h6 class="card-subtitle mb-2 fw-bold">Net Margin</h6>
+                <div class="d-flex justify-content-between align-items-center">
+                  <h4 id = 'netmarginchange'class="card-title mb-0 text-blue">%</h4>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6 col-md-6 col-lg-3">
+            <div class="card h-100 rounded-4 shadow">
+              <div class="card-body">
+                <h6 class="card-subtitle mb-2 fw-bold">Historical - CAGR</h6>
+                <div class="d-flex justify-content-between align-items-center">
+                  <h4 id="historicalcagr" class="card-title mb-0 text-blue fw-bold">%</h4>
+                  <span class="text-success fs-5 fw-bold">↑</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6 col-md-6 col-lg-3">
+            <div class="card h-100 rounded-4 shadow">
+              <div class="card-body">
+                <h6 class="card-subtitle mb-2 fw-bold">Forecast - CAGR</h6>
+                <div class="d-flex justify-content-between align-items-center">
+                  <h4  id="Forecastcagr" class="card-title mb-0 text-blue">%</h4>
+                  <span class="text-success fs-5 fw-bold">↑</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card rounded-5" id="revenueCard" style="display: none">
+          <div class="card-body px-5 py-4">
+            <h3 class="card-title text-blue fw-bold px-4">Revenue Analytics</h3>
+            <div style="position: relative; height: 600px; width: 100%;">
+              <canvas id="revenueChart" style="max-height: 100%; width: 100%;"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="{% static 'js/salesforcast.js' %}"></script>
+  </body>
+</html>

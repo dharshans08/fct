@@ -1,0 +1,159 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <title>Add Sales</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon.png' %}" />
+  <link rel="stylesheet" type="text/css" href="{% static 'css/addsales.css' %}" />
+</head>
+
+<body>
+  <!-- Loading Spinner -->
+  <div class="loading-spinner" id="loadingSpinner">
+    <div class="spinner-container">
+      <div class="spinner" id="spinner"></div>
+      <div class="please-wait-text" id="pleaseWait">Please wait...</div>
+      <div class="progress-container" id="progressContainer">
+        <div class="progress-bar" id="uploadProgress"></div>
+        <div class="progress-text" id="uploadProgressText">0%</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex">
+    <!-- Add a button for toggling sidebar on mobile -->
+    <button class="sidebar-toggle d-lg-none" type="button">
+      <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Add responsive classes to sidebar -->
+    <div class="sidebar d-lg-block">
+      <a href="#" class="logo d-flex align-items-center">
+        <img src="{% static 'images/logo.png' %}" alt="TRIK Logo" style="
+              max-width: 70%;
+              height: auto;
+              margin-left: 5%;
+              margin-bottom: 10%;
+            " />
+      </a>
+      <div class="nav flex-column">
+        <a href="{% url 'sales_forcast' %}" class="nav-link d-flex align-items-center" style="font-weight: 600">
+          <img src="{% static 'images/salesforcast.png' %}" alt="TRIK Logo" class="navicon" />
+          Sales Forecasting
+        </a>
+        <a href="{% url 'sales_history' %}" class="nav-link d-flex align-items-center" style="font-weight: 600">
+          <img src="{% static 'images/salesicon.png' %}" alt="TRIK Logo" class="navicon" />
+          Historical Sales
+        </a>
+        <a href="#" class="nav-link active d-flex align-items-center" style="font-weight: 600">
+          <img src="{% static 'images/addsalesicon.png' %}" alt="TRIK Logo" class="navicon" />
+          Add Sales Data
+        </a>
+        <a href="{% url 'forecasting' %}" class="nav-link d-flex align-items-center" style="font-weight: 600">
+          <img src="{% static 'images/salesforcast.png' %}" alt="TRIK Logo"class="navicon" />
+          Forecasting
+        </a>
+        <a href="{% url 'logout' %}" class="nav-link d-flex align-items-center mt-auto" style="font-weight: 600">
+          <img src="{% static 'images/logouticon.png' %}" alt="TRIK Logo" class="navicon" />
+          Logout
+        </a>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container-fluid py-4 px-4">
+      <div class="d-flex justify-content-end align-items-center mb-4 margin-right: 1rem;">
+        <div class="user-icon">
+          <img src="{% static 'images/usericon.png' %}" alt="TRIK Logo"
+            style="max-width: 80%; height: auto; margin-left: 5%" />
+          <span class="ms-2">{{ user.username }}</span>
+        </div>
+      </div>
+      <h2 class="mb-0 text-blue">CSV File Upload</h2>
+      <div id="upload-container">
+        <div id="upload-area" class="upload-area mb-4">
+          <input type="file" id="file-input" accept=".csv" class="d-none" />
+          <img id="upload-icon" src="{% static 'images/uploadicon.png' %}" alt="TRIK Logo" style="
+                max-width: 80%;
+                height: auto;
+                margin-left: 5%;
+                margin-right: 5%;
+                margin-bottom: 1%;
+              " />
+          <p class="mb-3">Drag & drop or click to choose to files</p>
+          <small id="max-size" class="text-muted">Max file Size: 100MB</small>
+        </div>
+        <div class="text-end">
+          <button class="btn btn-primary w-10 w-sm-70" id="submit-btn" disabled>
+            Submit
+          </button>
+        </div>
+        <div id="file-preview" class="file-preview">
+          <div class="file-card">
+            <div class="d-flex align-items-center flex-grow-1">
+              <div class="file-icon">
+                <i class="fas fa-file-csv text-primary"></i>
+              </div>
+              <div class="file-info">
+                <div class="file-name"></div>
+                <div class="file-size"></div>
+              </div>
+            </div>
+            <div class="file-actions">
+              <button class="action-btn delete-btn" id="remove-file" onclick="location.reload()"  title="Delete">
+                <img src="{% static 'images/deletefileicon.png' %}" alt="TRIK Logo"
+                  style="max-width: 80%; height: auto" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="uploadSummaryModal" tabindex="-1" aria-labelledby="uploadSummaryModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered custom-modal-margin">
+      <div class="modal-content py-3 rounded-4 shadow">
+        <button type="button" class="btn-close btn-close-sm position-absolute end-0 top-0 m-3 z-3"
+          data-bs-dismiss="modal" aria-label="Close" onclick="location.reload();"></button>
+        <div class="modal-header border-0 px-3 py-6 position-relative">
+          <h5
+            class="modal-title pt-3 text-primary text-center fs-4 fw-bold m-0 w-100 position-absolute start-0 top-50 translate-middle-y"
+            id="uploadSummaryModalLabel">
+            successfully added records
+          </h5>
+        </div>
+        <div class="modal-body pt-2 pb-3 mt-3 d-flex justify-content-center">
+          <div class="p-3 rounded-3 bg-custom" style="width: 90%">
+            <div class="d-flex align-items-center mb-3">
+              <!-- <i class="fas fa-file-alt me-3 fs-5"></i>
+              <span class="fw-bold fs-5">Total records</span>
+              <span class="ms-auto fw-bold fs-5" data-records="total">0</span> -->
+            </div>
+            <div class="d-flex align-items-center mb-3">
+              <i class="fas fa-check-circle me-3 fs-5 text-success"></i>
+              <span class="fw-bold fs-5">Added records</span>
+              <span class="ms-auto fw-bold fs-5" data-records="added">0</span>
+            </div>
+            <div class="d-flex align-items-center">
+              <!-- <i class="fas fa-times-circle me-3 fs-5 text-danger"></i>
+              <span class="fw-bold fs-5 text-danger">Invalid records</span>
+              <span class="ms-auto fw-bold fs-5 text-danger" data-records="invalid">0</span> -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+  <script type="module" src="{% static 'js/addsales.js' %}"></script>
+</body>
+
+</html>

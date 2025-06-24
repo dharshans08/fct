@@ -1,0 +1,73 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon.png' %}">
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'css/login.css' %}"
+    />
+  </head>
+  <body> 
+    <div class="container-fluid">
+      <div class="row login-container">
+        <div class="col-md-4 login-section">
+          <div class="d-flex flex-column justify-content-center h-100">
+            <div class="mx-auto w-100" style="max-width: 400px">
+              <h2 class="text-white mb-4 fw-bold ">Login</h2>
+              {% if alert %}
+                <div class="alert alert-danger" role="alert">
+                  {{ alert }}
+                </div>
+              {% endif %}
+              <form method="POST" action="{% url 'login' %}">
+                {% csrf_token %}
+                <div class="mb-3">
+                  <label class="form-label">Email</label>
+                  <input
+                    type="email"
+                    name="email"
+                    class="form-control"
+                    placeholder="Enter your email id"
+                    value="{{ email|default:'' }}"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Password</label>
+                  <input
+                    type="password"
+                    name="password"
+                    class="form-control"
+                    placeholder="Enter your password"
+                    value="{{ password|default:'' }}"
+                  />
+                </div>
+                <button type="submit" class="btn btn-login">Login</button>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-8 logo-section">
+          <div class="logo">
+            <img
+              src="{% static 'images/logo.png' %}"
+              alt="TRIK Logo"
+              style="max-width: 80%;
+              height: auto; 
+              margin-left: 5%" 
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

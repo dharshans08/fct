@@ -1,0 +1,178 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon.png' %}" />
+  <link rel="stylesheet" type="text/css" href="{% static 'css/forecasting.css' %}" />
+  <title>Forecasting</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+  <div class="d-flex">
+    <!-- Sidebar -->
+    <button class="sidebar-toggle d-lg-none" type="button">
+      <i class="fas fa-bars"></i>
+    </button>
+
+    <div class="sidebar d-lg-block">
+      <a href="#" class="logo d-flex align-items-center">
+        <img src="{% static 'images/logo.png' %}" alt="TRIK Logo"
+          style="max-width: 70%; height: auto; margin-left: 5%; margin-bottom: 10%;" />
+      </a>
+      <div class="nav flex-column">
+        <a href="{% url 'sales_forcast' %}"
+          class="nav-link {% if request.resolver_match.url_name == 'sales_forcast' %}active{% endif %}"
+          style="font-weight: 600">
+          <img src="{% static 'images/salesforcast.png' %}" alt="TRIK Logo" class="navicon" />
+          Sales Forecasting
+        </a>
+        <a href="{% url 'sales_history' %}" class="nav-link d-flex align-items-center" style="font-weight: 600">
+          <img src="{% static 'images/salesicon.png' %}" alt="TRIK Logo" class="navicon" />
+          Historical Sales
+        </a>
+        <a href="{% url 'add_sales' %}" class="nav-link d-flex align-items-center" style="font-weight: 600">
+          <img src="{% static 'images/addsalesicon.png' %}" alt="TRIK Logo" class="navicon" />
+          Add Sales Data
+        </a>
+        <a href="{% url 'forecasting' %}"
+          class="nav-link {% if request.resolver_match.url_name == 'forecasting' %}active{% endif %}"
+          style="font-weight: 600">
+          <img src="{% static 'images/salesforcast.png' %}" alt="TRIK Logo" class="navicon" />
+          Forecasting
+        </a>
+        <a href="{% url 'logout' %}" class="nav-link d-flex align-items-center mt-auto" 
+        style="font-weight: 600" onclick="clearLocalStorage()">
+        <img src="{% static 'images/logouticon.png' %}" alt="TRIK Logo" class="navicon" />
+        Logout
+        </a>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container-fluid py-4 px-4">
+      <!-- Header Section with Filters -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center flex-wrap gap-3">
+          <!-- Product Filter -->
+          <div class="filter-section me-3">
+            <button class="filter-btn d-flex align-items-center" id="filterButton" onclick="togglePopup()">
+              Product   
+              <span class="vertical-line"></span>
+              <span id="selectedProductsText" style="margin-left: 10px;"></span>
+              <i class="fas fa-chevron-down ms-1 align-self-center"></i>
+            </button>
+            
+            <div id="filterPopup" class="popup" style="display: none; width: 250px; background: white; padding: 10px; border: 1px solid #ddd;">
+              <input type="text" id="searchInput" class="filter-search form-control" placeholder="Search products..." oninput="filterProducts()">
+              <div class="product-filters" id="productCheckboxContainer"></div>
+            </div> 
+          </div>
+          <div class="filter-section me-3">
+            <button class="filter-btn d-flex align-items-center" id="accountOwnerButton" onclick="toggleAccountOwnerPopup()">
+                Account Owner
+                <span class="vertical-line"></span>
+                <span id="selectedAccountOwnerText" style="margin-left: 10px;"></span>
+                <i class="fas fa-chevron-down ms-1 align-self-center"></i>
+            </button>
+            
+            <div id="accountOwnerPopup" class="popup" style="display: none; width: 250px; background: white; padding: 10px; border: 1px solid #ddd;">
+                <input type="text" id="accountOwnerSearchInput" class="filter-search form-control" placeholder="Search account owner..." oninput="filterAccountOwners()">
+                <div class="account-owner-filters" id="accountOwnerCheckboxContainer"></div>
+            </div> 
+        </div>
+          <div class="filter-section me-3">
+            <button class="filter-btn d-flex align-items-center" id="regionButton" onclick="toggleregionPopup()">
+              Region 
+              <span class="vertical-line"></span>
+              <span id="selectedregionText" style="margin-left: 10px;"></span>
+              <i class="fas fa-chevron-down ms-1 align-self-center"></i>
+            </button>
+            
+            <div id="regionPopup" class="popup" style="display: none; width: 250px; background: white; padding: 10px; border: 1px solid #ddd;">
+              <input type="text" id="regionsearchInput" class="filter-search form-control" placeholder="Search region..." oninput="filterregions()">
+              <div class="region-filters" id="regionCheckboxContainer"></div>
+            </div> 
+          </div>
+          <div class="filter-section me-3">
+            <button class="filter-btn d-flex align-items-center" id="productFamilyButton" onclick="toggleProductFamilyPopup()">
+              Product Family
+              <span class="vertical-line"></span>
+              <span id="selectedProductFamilyText" style="margin-left: 10px;"></span>
+              <i class="fas fa-chevron-down ms-1 align-self-center"></i>
+            </button>
+           <div id="productFamilyPopup" class="popup" style="display: none; width: 250px; background: white; padding: 10px; border: 1px solid #ddd;">
+              <input type="text" id="productFamilySearchInput" class="filter-search form-control" placeholder="Search product family..." oninput="filterProductFamilies()">
+              <div class="product-family-filters" id="productFamilyCheckboxContainer"></div>
+            </div> 
+          </div>
+          <!-- Date Filters -->
+          <!-- Date Filters with reduced spacing -->
+          <div class="date-filters d-flex align-items-center">
+            <div class="input-group me-2">
+              <span class="input-group-text bg-white fw-bold">From</span>
+              <input type="date" class="form-control" id="fromDate" value="{{ start_date }}" />
+            </div>
+
+            <div class="input-group me-2">
+              <span class="input-group-text bg-white fw-bold">To</span>
+              <input type="date" class="form-control" id="toDate" value="{{ end_date }}" />
+            </div>
+
+            <button class="btn btn-secondary" id="generateBtn" disabled>
+              Generate
+            </button>
+          </div>
+
+
+        </div>
+
+        <!-- User Icon -->
+        <div class="user-icon">
+          <img src="{% static 'images/usericon.png' %}" alt="TRIK Logo"
+            style="max-width: 80%; height: auto; margin-left: 20%" />
+          <span class="ms-2">{{ user.username }}</span>
+        </div>
+      </div>
+
+      <!-- Title -->
+      <h2 class="mb-2 text-blue">Volume Forecasting</h2>
+
+      <!-- Info Text -->
+      <div id="infoText"
+        class="text-center my-4 p-3 rounded d-flex flex-column align-items-center justify-content-center"
+        style="display: {% if start_date and end_date %}none{% else %}flex{% endif %}">
+        <img src="{% static 'images/InfoText.png' %}" alt="Select Date Range" class="mb-3"
+          style="max-width: 250px; max-height: 250px; margin-top: 100px;" />
+        <p class="text-danger fw-bold fs-5">
+          Please Select product name and From Date and To Date to generate the volumeForecasting.
+        </p>
+      </div>
+
+      <!-- Chart Container -->
+      <div>
+        <canvas id="volumechart" style="max-height: 600px; width: 1300px;"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="{% static 'js/forecasting.js' %}"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+  <script id="productData" type="application/json">{{ product_names|safe }}</script>
+  <script id="accountowners-data" type="application/json">
+    {{ account_owners|safe }}
+</script>
+<script id="productfamilies-data" type="application/json">
+  {{ product_families|safe }}
+</script>
+<script id="regions-data" type="application/json">{{ regions|safe }}</script>
+
+</body>
+
+</html>
